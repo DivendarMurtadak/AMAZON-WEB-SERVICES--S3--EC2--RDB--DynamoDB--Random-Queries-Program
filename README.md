@@ -1,8 +1,8 @@
 AMAZON-WEB-SERVICES--S3--EC2--RDB--DynamoDB--Random-Queries-Program
 ===================================================================
 
-• Program to copy the CSV or TSV file from local machine to AWS S3. 
-• Using EC2 instance put that data into an AWS Relational DB and non- relational DB (NoSQL). 
+• Program to copy the CSV or TSV file from local machine to AWS S3.
+• Using EC2 instance put that data into an AWS Relational DB and non- relational DB (NoSQL).
 • Execute 50 thousand random queries on that data and calculate the time.
 
 ===================================================================
