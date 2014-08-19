@@ -55,139 +55,147 @@ import com.amazonaws.services.s3.transfer.Upload;
  * <p>
  * WANRNING:</b> To avoid accidental leakage of your credentials, DO NOT keep
  * the credentials file in your source directory.
- *
+ * 
  * http://aws.amazon.com/security-credentials
  */
 public class S3TransferProgressSample {
 
-    private static AWSCredentials credentials = null;
-    private static TransferManager tx;
-    private static String bucketName;
+	private static AWSCredentials credentials = null;
+	private static TransferManager tx;
+	private static String bucketName;
 
-    private JProgressBar pb;
-    private JFrame frame;
-    private Upload upload;
-    private JButton button;
-    long lEndTime=0;
-    long lStartTime=0;
+	private JProgressBar pb;
+	private JFrame frame;
+	private Upload upload;
+	private JButton button;
+	long lEndTime = 0;
+	long lStartTime = 0;
 
-    public static void main(String[] args) throws Exception {
-        /*
-         * The ProfileCredentialsProvider will return your [default]
-         * credential profile by reading from the credentials file located at
-         * (C:\\Users\\divendar\\.aws\\credentials).
-         *
-         * TransferManager manages a pool of threads, so we create a
-         * single instance and share it throughout our application.
-         */
-        try {
-            credentials = new ProfileCredentialsProvider("default").getCredentials();
-        } catch (Exception e) {
-            throw new AmazonClientException(
-                    "Cannot load the credentials from the credential profiles file. " +
-                    "Please make sure that your credentials file is at the correct " +
-                    "location (C:\\Users\\ankit\\.aws\\credentials), and is in valid format.",
-                    e);
-        }
+	public static void main(String[] args) throws Exception {
+		/*
+		 * The ProfileCredentialsProvider will return your [default] credential
+		 * profile by reading from the credentials file located at
+		 * (C:\\Users\\divendar\\.aws\\credentials).
+		 * 
+		 * TransferManager manages a pool of threads, so we create a single
+		 * instance and share it throughout our application.
+		 */
+		try {
+			credentials = new ProfileCredentialsProvider("default")
+					.getCredentials();
+		} catch (Exception e) {
+			throw new AmazonClientException(
+					"Cannot load the credentials from the credential profiles file. "
+							+ "Please make sure that your credentials file is at the correct "
+							+ "location (C:\\Users\\divendar\\.aws\\credentials), and is in valid format.",
+					e);
+		}
 
-        AmazonS3 s3 = new AmazonS3Client(credentials);
-        Region usWest2 = Region.getRegion(Regions.US_WEST_2);
-        s3.setRegion(usWest2);
-        tx = new TransferManager(s3);
+		AmazonS3 s3 = new AmazonS3Client(credentials);
+		Region usWest2 = Region.getRegion(Regions.US_WEST_2);
+		s3.setRegion(usWest2);
+		tx = new TransferManager(s3);
 
-        bucketName = "cloudassignment3" + credentials.getAWSAccessKeyId().toLowerCase();
+		bucketName = "cloudassignment3"
+				+ credentials.getAWSAccessKeyId().toLowerCase();
 
-        new S3TransferProgressSample();
-    }
+		new S3TransferProgressSample();
+	}
 
-    public S3TransferProgressSample() throws Exception {
-        frame = new JFrame("Amazon S3 File Upload");
-        button = new JButton("Choose File...");
-        button.addActionListener(new ButtonListener());
-        
-        pb = new JProgressBar(0, 100);
-        pb.setStringPainted(true);
+	public S3TransferProgressSample() throws Exception {
+		frame = new JFrame("Amazon S3 File Upload");
+		button = new JButton("Choose File...");
+		button.addActionListener(new ButtonListener());
 
-        frame.setContentPane(createContentPane());
-        frame.pack();
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
+		pb = new JProgressBar(0, 100);
+		pb.setStringPainted(true);
 
-    class ButtonListener implements ActionListener {
-        public void actionPerformed(ActionEvent ae) {
-            JFileChooser fileChooser = new JFileChooser();
-            int showOpenDialog = fileChooser.showOpenDialog(frame);
-            if (showOpenDialog != JFileChooser.APPROVE_OPTION) return;
-            lStartTime = new Date().getTime();
-            System.out.println("start");
-            createAmazonS3Bucket();
+		frame.setContentPane(createContentPane());
+		frame.pack();
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
 
-            ProgressListener progressListener = new ProgressListener() {
-                public void progressChanged(ProgressEvent progressEvent) {
-                    if (upload == null) return;
-                    // start time  to calculate time of execution
-                    
-                    pb.setValue((int)upload.getProgress().getPercentTransferred());
+	class ButtonListener implements ActionListener {
+		public void actionPerformed(ActionEvent ae) {
+			JFileChooser fileChooser = new JFileChooser();
+			int showOpenDialog = fileChooser.showOpenDialog(frame);
+			if (showOpenDialog != JFileChooser.APPROVE_OPTION)
+				return;
+			lStartTime = new Date().getTime();
+			System.out.println("start");
+			createAmazonS3Bucket();
 
-                    switch (progressEvent.getEventCode()) {
-                    case ProgressEvent.COMPLETED_EVENT_CODE:
-                    {
-                    	pb.setValue(100);
-                    	
-                    	// calculate time difference for update file time
-                    	 lEndTime = new Date().getTime();
-                    	long difference = lEndTime - lStartTime;
-                    	System.out.println("Elapsed milliseconds: " + difference);
-                    	System.out.println("Elapsed seconds: " + difference*0.001);
-                    	break;
-                    }
-                    	
-                        
-                    case ProgressEvent.FAILED_EVENT_CODE:
-                        try {
-                            AmazonClientException e = upload.waitForException();
-                            JOptionPane.showMessageDialog(frame,
-                                    "Unable to upload file to Amazon S3: " + e.getMessage(),
-                                    "Error Uploading File", JOptionPane.ERROR_MESSAGE);
-                        } catch (InterruptedException e) {}
-                        break;
-                    }
-                }
-            };
-           
-        	
-            File fileToUpload = fileChooser.getSelectedFile();
-            PutObjectRequest request = new PutObjectRequest(
-                    bucketName, fileToUpload.getName(), fileToUpload)
-                .withGeneralProgressListener(progressListener);
-            upload = tx.upload(request);
-            
-            
-          //some tasks       ec2-54-213-212-199.us-west-2.compute.amazonaws.com
-            }
-    }
+			ProgressListener progressListener = new ProgressListener() {
+				public void progressChanged(ProgressEvent progressEvent) {
+					if (upload == null)
+						return;
+					// start time to calculate time of execution
 
-    private void createAmazonS3Bucket() {
-        try {
-            if (tx.getAmazonS3Client().doesBucketExist(bucketName) == false) {
-                tx.getAmazonS3Client().createBucket(bucketName);
-            }
-        } catch (AmazonClientException ace) {
-            JOptionPane.showMessageDialog(frame, "Unable to create a new Amazon S3 bucket: " + ace.getMessage(),
-                    "Error Creating Bucket", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+					pb.setValue((int) upload.getProgress()
+							.getPercentTransferred());
 
-    private JPanel createContentPane() {
-        JPanel panel = new JPanel();
-        panel.add(button);
-        panel.add(pb);
+					switch (progressEvent.getEventCode()) {
+					case ProgressEvent.COMPLETED_EVENT_CODE: {
+						pb.setValue(100);
 
-        JPanel borderPanel = new JPanel();
-        borderPanel.setLayout(new BorderLayout());
-        borderPanel.add(panel, BorderLayout.NORTH);
-        borderPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        return borderPanel;
-    }
+						// calculate time difference for update file time
+						lEndTime = new Date().getTime();
+						long difference = lEndTime - lStartTime;
+						System.out.println("Elapsed milliseconds: "
+								+ difference);
+						System.out.println("Elapsed seconds: " + difference
+								* 0.001);
+						break;
+					}
+
+					case ProgressEvent.FAILED_EVENT_CODE:
+						try {
+							AmazonClientException e = upload.waitForException();
+							JOptionPane.showMessageDialog(
+									frame,
+									"Unable to upload file to Amazon S3: "
+											+ e.getMessage(),
+									"Error Uploading File",
+									JOptionPane.ERROR_MESSAGE);
+						} catch (InterruptedException e) {
+						}
+						break;
+					}
+				}
+			};
+
+			File fileToUpload = fileChooser.getSelectedFile();
+			PutObjectRequest request = new PutObjectRequest(bucketName,
+					fileToUpload.getName(), fileToUpload)
+					.withGeneralProgressListener(progressListener);
+			upload = tx.upload(request);
+		}
+	}
+
+	private void createAmazonS3Bucket() {
+		try {
+			if (tx.getAmazonS3Client().doesBucketExist(bucketName) == false) {
+				tx.getAmazonS3Client().createBucket(bucketName);
+			}
+		} catch (AmazonClientException ace) {
+			JOptionPane.showMessageDialog(
+					frame,
+					"Unable to create a new Amazon S3 bucket: "
+							+ ace.getMessage(), "Error Creating Bucket",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private JPanel createContentPane() {
+		JPanel panel = new JPanel();
+		panel.add(button);
+		panel.add(pb);
+
+		JPanel borderPanel = new JPanel();
+		borderPanel.setLayout(new BorderLayout());
+		borderPanel.add(panel, BorderLayout.NORTH);
+		borderPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+		return borderPanel;
+	}
 }
