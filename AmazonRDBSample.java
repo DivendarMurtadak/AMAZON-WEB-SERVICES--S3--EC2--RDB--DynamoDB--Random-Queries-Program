@@ -39,12 +39,12 @@ System.out.println("Table Creation Example!");
      } 
   
           
-     con = DriverManager.getConnection("jdbc:mysql://ankit.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306/innodb","cloud3","akdv1234");
+     con = DriverManager.getConnection("jdbc:mysql://Divendar.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306/innodb","cloud3","akdv1234");
      System.out.println("Connected to the database....");
-     con = DriverManager.getConnection("jdbc:mysql://ankitdeven.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306/innodb","ankit","akdv1234");
-  con = DriverManager.getConnection("jdbc:mysql://localhost:3306/innodb","ankit","akdv1234");
+     con = DriverManager.getConnection("jdbc:mysql://Divendar.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306/innodb","Divendar","akdv1234");
+  con = DriverManager.getConnection("jdbc:mysql://localhost:3306/innodb","Divendar","akdv1234");
  try{
-	 jdbc:mysql:localhost/jdbcdb////ankitdeven.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306
+	 jdbc:mysql:localhost/jdbcdb////Divendar.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306
   Statement st = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
  // String filename= "weather-100K.csv";
   BufferedReader br = new BufferedReader(new FileReader(filename));
