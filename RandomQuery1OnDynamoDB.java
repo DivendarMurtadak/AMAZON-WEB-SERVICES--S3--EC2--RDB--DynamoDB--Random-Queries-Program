@@ -46,109 +46,113 @@ import com.amazonaws.services.dynamodbv2.util.Tables;
  * This sample demonstrates how to perform a few simple operations with the
  * Amazon DynamoDB service.
  */
-public class RandomQuery1OnDynamoDB{
+public class RandomQuery1OnDynamoDB {
 
-    /*
-     * WANRNING:
-     *      To avoid accidental leakage of your credentials, DO NOT keep
-     *      the credentials file in your source directory.
-     */
+	/*
+	 * WANRNING: To avoid accidental leakage of your credentials, DO NOT keep
+	 * the credentials file in your source directory.
+	 */
 
-    static AmazonDynamoDBClient dynamoDB;
-    static AmazonDynamoDBClient client = new AmazonDynamoDBClient(new ProfileCredentialsProvider());
-    static String tableName = "weather-100k";
+	static AmazonDynamoDBClient dynamoDB;
+	static AmazonDynamoDBClient client = new AmazonDynamoDBClient(
+			new ProfileCredentialsProvider());
+	static String tableName = "weather-100k";
 
-    /**
-     * The only information needed to create a client are security credentials
-     * consisting of the AWS Access Key ID and Secret Access Key. All other
-     * configuration, such as the service endpoints, are performed
-     * automatically. Client parameters, such as proxies, can be specified in an
-     * optional ClientConfiguration object when constructing a client.
-     *
-     * @see com.amazonaws.auth.BasicAWSCredentials
-     * @see com.amazonaws.auth.ProfilesConfigFile
-     * @see com.amazonaws.ClientConfiguration
-     */
-    private static void init() throws Exception {
-        /*
-         * The ProfileCredentialsProvider will return your [default]
-         * credential profile by reading from the credentials file located at
-         * (C:\\Users\\Divendar\\.aws\\credentials).
-         */
+	/**
+	 * The only information needed to create a client are security credentials
+	 * consisting of the AWS Access Key ID and Secret Access Key. All other
+	 * configuration, such as the service endpoints, are performed
+	 * automatically. Client parameters, such as proxies, can be specified in an
+	 * optional ClientConfiguration object when constructing a client.
+	 * 
+	 * @see com.amazonaws.auth.BasicAWSCredentials
+	 * @see com.amazonaws.auth.ProfilesConfigFile
+	 * @see com.amazonaws.ClientConfiguration
+	 */
+	private static void init() throws Exception {
+		/*
+		 * The ProfileCredentialsProvider will return your [default] credential
+		 * profile by reading from the credentials file located at
+		 * (C:\\Users\\Divendar\\.aws\\credentials).
+		 */
 
+		AWSCredentials credentials = null;
+		try {
+			credentials = new ProfileCredentialsProvider("default")
+					.getCredentials();
+		} catch (Exception e) {
+			throw new AmazonClientException(
+					"Cannot load the credentials from the credential profiles file. "
+							+ "Please make sure that your credentials file is at the correct "
+							+ "location (C:\\Users\\Divendar\\.aws\\credentials), and is in valid format.",
+					e);
+		}
+		dynamoDB = new AmazonDynamoDBClient(credentials);
+		Region usWest2 = Region.getRegion(Regions.US_WEST_2);
+		dynamoDB.setRegion(usWest2);
+	}
 
-        AWSCredentials credentials = null;
-        try {
-            credentials = new ProfileCredentialsProvider("default").getCredentials();
-        } catch (Exception e) {
-            throw new AmazonClientException(
-                    "Cannot load the credentials from the credential profiles file. " +
-                    "Please make sure that your credentials file is at the correct " +
-                    "location (C:\\Users\\Divendar\\.aws\\credentials), and is in valid format.",
-                    e);
-        }
-        dynamoDB = new AmazonDynamoDBClient(credentials);
-        Region usWest2 = Region.getRegion(Regions.US_WEST_2);
-        dynamoDB.setRegion(usWest2);
-    }
+	public static void main(String[] args) throws Exception {
+		init();
 
-    public static void main(String[] args) throws Exception {
-        init();
+		try {
 
-        try {
-            
+			// Describe our new table
+			DescribeTableRequest describeTableRequest = new DescribeTableRequest()
+					.withTableName(tableName);
+			TableDescription tableDescription = dynamoDB.describeTable(
+					describeTableRequest).getTable();
+			System.out.println("Table Description: " + tableDescription);
 
-            // Describe our new table
-           DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
-           TableDescription tableDescription = dynamoDB.describeTable(describeTableRequest).getTable();
-           System.out.println("Table Description: " + tableDescription);
-           
-           System.out.println("Table count :"+ tableDescription.getItemCount());
-           
-           long  lStartTime = new Date().getTime();
-           System.out.println("start time: "+lStartTime);
-           Random rn= new Random();
-            // Scan items for movies with a year attribute greater than 1985
-           Long lItem = tableDescription.getItemCount();
-           int iNoOfItems = lItem.intValue();
-           System.out.println("no of item "+lItem);
-            for (int i = 0; i <= 49999; i++) {
-            	 String randomInt = Integer.toString(rn.nextInt(iNoOfItems));
-    			 //System.out.println("Test :"+randomInt);	
-    			  HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
-    	            Condition condition = new Condition()
-    	                .withComparisonOperator(ComparisonOperator.EQ.toString())
-    	                .withAttributeValueList(new AttributeValue().withN(randomInt));
-    	            scanFilter.put("id", condition);
-    	            ScanRequest scanRequest = new ScanRequest(tableName).withScanFilter(scanFilter);
-    	            ScanResult scanResult = dynamoDB.scan(scanRequest);
-    	            System.out.println("Random No :"+randomInt+":: Query no: "+(i+1));
-    	            //
-    	          //  System.out.println("Result: " + scanResult);
+			System.out.println("Table count :"
+					+ tableDescription.getItemCount());
 
-			} 
-          //calculate time difference for update file time
-        	long lEndTime = new Date().getTime();
-        	long difference = lEndTime - lStartTime;
-        	System.out.println("Elapsed milliseconds: " + difference);
-        	System.out.println("Elapsed seconds: " + difference*0.001);
-        	System.out.println("Elapsed Minutes: " + (int) ((difference / (1000*60)) % 60));
-        	
-        } catch (AmazonServiceException ase) {
-            System.out.println("Caught an AmazonServiceException, which means your request made it "
-                    + "to AWS, but was rejected with an error response for some reason.");
-            System.out.println("Error Message:    " + ase.getMessage());
-            System.out.println("HTTP Status Code: " + ase.getStatusCode());
-            System.out.println("AWS Error Code:   " + ase.getErrorCode());
-            System.out.println("Error Type:       " + ase.getErrorType());
-            System.out.println("Request ID:       " + ase.getRequestId());
-        } catch (AmazonClientException ace) {
-            System.out.println("Caught an AmazonClientException, which means the client encountered "
-                    + "a serious internal problem while trying to communicate with AWS, "
-                    + "such as not being able to access the network.");
-            System.out.println("Error Message: " + ace.getMessage());
-        }
-    }
-    
-    
+			long lStartTime = new Date().getTime();
+			System.out.println("start time: " + lStartTime);
+			Random rn = new Random();
+			// Scan items for movies with a year attribute greater than 1985
+			Long lItem = tableDescription.getItemCount();
+			int iNoOfItems = lItem.intValue();
+			System.out.println("no of item " + lItem);
+			for (int i = 0; i <= 49999; i++) {
+				String randomInt = Integer.toString(rn.nextInt(iNoOfItems));
+				HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
+				Condition condition = new Condition().withComparisonOperator(
+						ComparisonOperator.EQ.toString())
+						.withAttributeValueList(
+								new AttributeValue().withN(randomInt));
+				scanFilter.put("id", condition);
+				ScanRequest scanRequest = new ScanRequest(tableName)
+						.withScanFilter(scanFilter);
+				ScanResult scanResult = dynamoDB.scan(scanRequest);
+				System.out.println("Random No :" + randomInt + ":: Query no: "
+						+ (i + 1));
+
+			}
+			// calculate time difference for update file time
+			long lEndTime = new Date().getTime();
+			long difference = lEndTime - lStartTime;
+			System.out.println("Elapsed milliseconds: " + difference);
+			System.out.println("Elapsed seconds: " + difference * 0.001);
+			System.out.println("Elapsed Minutes: "
+					+ (int) ((difference / (1000 * 60)) % 60));
+
+		} catch (AmazonServiceException ase) {
+			System.out
+					.println("Caught an AmazonServiceException, which means your request made it "
+							+ "to AWS, but was rejected with an error response for some reason.");
+			System.out.println("Error Message:    " + ase.getMessage());
+			System.out.println("HTTP Status Code: " + ase.getStatusCode());
+			System.out.println("AWS Error Code:   " + ase.getErrorCode());
+			System.out.println("Error Type:       " + ase.getErrorType());
+			System.out.println("Request ID:       " + ase.getRequestId());
+		} catch (AmazonClientException ace) {
+			System.out
+					.println("Caught an AmazonClientException, which means the client encountered "
+							+ "a serious internal problem while trying to communicate with AWS, "
+							+ "such as not being able to access the network.");
+			System.out.println("Error Message: " + ace.getMessage());
+		}
+	}
+
 }
