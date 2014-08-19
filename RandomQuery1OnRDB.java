@@ -20,14 +20,13 @@ public class RandomQuery1OnRDB{
      } 
    long  lStartTime = new Date().getTime();
      System.out.println("start");
-     con = DriverManager.getConnection("jdbc:mysql://localhost:3306/?","ankit","akdv1234");
-     //con = DriverManager.getConnection("jdbc:mysql://ankitdeven.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306/innodb","ankit","akdv1234");
- // con = DriverManager.getConnection("jdbc:mysql://localhost:3306/innodb","ankit","akdv1234");
- try{///jdbc:mysql://localhost/jdbcdb////ankitdeven.cury5aj8qlt4.us-west-2.rds.amazonaws.com:3306
+     con = DriverManager.getConnection("jdbc:mysql://localhost:3306/?","Divendar","akdv1234");
+     
+ try{
   Statement st = con.createStatement();
   
   String  sQuery= "";
-  String sQuery_No= "SELECT COUNT(column_name) FROM STATION;";//Integer.parseInt(sQuery_No) 
+  String sQuery_No= "SELECT COUNT(column_name) FROM STATION;";
   ResultSet rs = st.executeQuery(sQuery_No);
   int iCount=0;
   while (rs.next()) {
