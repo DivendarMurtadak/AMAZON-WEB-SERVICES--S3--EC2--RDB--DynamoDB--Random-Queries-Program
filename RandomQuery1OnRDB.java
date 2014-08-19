@@ -33,7 +33,6 @@ public class RandomQuery1OnRDB {
 					iCount = rs.getInt(0);
 					System.out.println(iCount + "\n");
 				}
-				// st.executeUpdate(sQuery);
 				System.out.println("start");
 				// Generating 50000 random queries
 				for (int i = 0; i <= 50000; i++) {
